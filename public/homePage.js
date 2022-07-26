@@ -3,18 +3,21 @@ const ratesBoard = new RatesBoard();
 const moneyManager = new MoneyManager()
 const widget = new FavoritesWidget()
 
-setInterval(() => {ApiConnector.getStocks(response => {
+let interval = setInterval(() => {ApiConnector.getStocks(response => {
     if (response.success) {
         ratesBoard.clearTable()
         ratesBoard.fillTable(response.data)
     }
-})}, 1000)
+})}, 6000)
 
 logoutButton.action = function() {
     ApiConnector.logout( (response) => {
         if (response.success) {
+            clearInterval(interval)
             location.reload()
-        }  
+        }  else {
+            alert('Ошибка подключения')
+        }
     })
 }
 
@@ -23,8 +26,10 @@ moneyManager.addMoneyCallback = function(data) {
         if (response.success){
             ProfileWidget.showProfile(response.data)
             widget.setMessage(response.success, 'Операция выполненена успешно!')
-        } else {
+        } else if (response.success === false) {
             widget.setMessage(response.success, response.error)
+        } else {
+            alert('Ошибка подключения')
         }
     })
 }
@@ -35,8 +40,10 @@ moneyManager.conversionMoneyCallback = function(data) {
         if (response.success){
             ProfileWidget.showProfile(response.data)
             widget.setMessage(response.success, 'Операция выполненена успешно!')
-        } else {
+        } else if (response.success === false)   {
             widget.setMessage(response.success, response.error)
+        } else {
+            alert('Ошибка подключения')
         }
     })
 }
@@ -46,8 +53,10 @@ moneyManager.sendMoneyCallback = function(data) {
         if (response.success){
             ProfileWidget.showProfile(response.data)
             widget.setMessage(response.success, 'Операция выполненена успешно!')
-        } else {
+        } else if (response.success === false)  {
             widget.setMessage(response.success, response.error)
+        } else {
+            alert('Ошибка подключения')
         }
     })
 }
@@ -55,12 +64,12 @@ moneyManager.sendMoneyCallback = function(data) {
 widget.addUserCallback = function(data) {
     ApiConnector.addUserToFavorites(data, response => {
         if (response.success) {
-            widget.clearTable()
-            widget.fillTable(response.data)
-            moneyManager.updateUsersList(response.data)
+            fillFavorite(response.data)
             widget.setMessage(response.success, 'Операция выполненена успешно!')
-        } else {
+        } else if (response.success === false) {
             widget.setMessage(response.success, response.error)
+        } else {
+            alert('Ошибка подключения')
         }
     })
 }
@@ -68,12 +77,12 @@ widget.addUserCallback = function(data) {
 widget.removeUserCallback = function(data) {
     ApiConnector.removeUserFromFavorites(data, response => {
         if (response.success) {
-            widget.clearTable()
-            widget.fillTable(response.data)
-            moneyManager.updateUsersList(response.data)
+            fillFavorite(response.data)
             widget.setMessage(response.success, 'Операция выполненена успешно!')
-        } else {
+        } else if (response.success === false) {
             widget.setMessage(response.success, response.error)
+        } else {
+            alert('Ошибка подключения')
         }
     })
 }
@@ -81,15 +90,22 @@ widget.removeUserCallback = function(data) {
 ApiConnector.current(response => {
     if (response.success) {
         ProfileWidget.showProfile(response.data)
+    } else {
+        alert('Ошибка подключения')
     }
 })
 
 ApiConnector.getFavorites( response => {
     if (response.success) {
-        widget.clearTable()
-        widget.fillTable(response.data)
-        moneyManager.updateUsersList(response.data)
-    } 
+        fillFavorite(response.data)
+    } else {
+        alert('Ошибка подключения')
+    }
 })
 
+const fillFavorite = (data) => {
+    widget.clearTable();
+    widget.fillTable(data);
+    moneyManager.updateUsersList(data)
+   }
 
